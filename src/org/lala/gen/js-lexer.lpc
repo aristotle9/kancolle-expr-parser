@@ -1,0 +1,220 @@
+/**
+js tokens
+**/
+
+
+%lex
+
+%class JsLexer
+%package org.lala.gen
+
+%%
+[ \r\n\t]			/* skip whitespace */
+
+0x[0-9a-fA-F]+		$$ = parseInt($$); return "hex";
+\d+		$$ = parseInt($$); return 'int';
+new     return 'new'
+RegExp  return 'RegExp'
+[a-zA-Z_$@][\w_$@]* return 'id'
+'[^']*'|"[^"]*" $$ = $$.substr(1, yyleng - 2); return 'string';
+/[^/]+/  $$ = $$.substr(1, yyleng - 2); return "RegExpLiteral";
+
+/** flowing with div **/
+!		return 'op'
+)		return ')'
++\+		return 'op'
+--		return 'op'
+\.\.	return 'op'
+\.\.\.	return 'op'
+]		return ']'
+}		return '}'
+~		return '~'
+
+false	$$ = false; return 'boolean'
+true	$$ = true; return 'boolean'
+null	$$ = null; return 'null'
+super		return 'kw'
+this		return 'kw'
+constructor	return 'kw'
+getter		return 'kw'
+method		return 'kw'
+override	return 'kw'
+setter		return 'kw'
+traditional	return 'kw'
+version		return 'kw'
+
+/** flowing with regexp **/
+!=		return 'op'
+!==		return 'op'
+#		return 'op'
+%   	return 'op'
+%=		return 'op'
+&		return '&'
+&&		return 'op'
+&&=		return 'op'
+&=		return 'op'
+\(		return '('
+*		return '*'
+*=		return 'op'
++		return '+'
++=		return 'op'
+,		return ','
+-		return '-'
+-=		return 'op'
+->		return 'op'
+\.		return '.'
+/		return '/'
+/=		return 'op'
+:		return 'op'
+::		return 'op'
+;		
+\<		return 'op'
+\<<		return '<<'
+\<<=		return 'op'
+\<=		return 'op'
+=		
+==		return 'op'
+===		return 'op'
+>		return 'op'
+>=		return 'op'
+>>		return '>>'
+>>=		return 'op'
+>>>		return '>>>'
+>>>=	return 'op'
+?		return 'op'
+@		return 'op'
+\[		return '['
+^		return 'op'
+^=		return 'op'
+^^		return 'op'
+^^=		return 'op'
+{		return '{'
+|		return '|'
+|=		return 'op'
+|\|		return 'op'
+|\|=	return 'op'
+abstract		return 'kw'
+break			return 'kw'
+case			return 'kw'
+catch			return 'kw'
+class			return 'kw'
+const			return 'kw'
+continue		return 'kw'
+debugger		return 'kw'
+default			return 'kw'
+delete			return 'kw'
+do				return 'kw'
+else			return 'kw'
+enum			return 'kw'
+export			return 'kw'
+extends			return 'kw'
+field			return 'kw'
+final			return 'kw'
+finally			return 'kw'
+for				return 'kw'
+function		return 'kw'
+goto			return 'kw'
+if				return 'kw'
+implements		return 'kw'
+import			return 'kw'
+in				return 'kw'
+instanceof		return 'kw'
+native			return 'kw'
+new				return 'kw'
+package			return 'kw'
+private			return 'kw'
+protected		return 'kw'
+public			return 'kw'
+return			return 'kw'
+static			return 'kw'
+switch			return 'kw'
+synchronized	return 'kw'
+throw			return 'kw'
+throws			return 'kw'
+transient		return 'kw'
+try				return 'kw'
+typeof			return 'kw'
+var				return 'kw'
+volatile		return 'kw'
+while			return 'kw'
+with			return 'kw'
+
+/** div **/
+[_$a-zA-Z][_$a-zA-Z0-9]*	return 'id'
+
+.		return 'other';
+
+%%
+
+/lex
+
+%class JsParser
+%package org.lala.gen
+/* %import org.lala.gen.JsLexer */
+%lexer_name org.lala.gen.JsLexer 
+
+%start VExpr
+
+%left ','
+%left '|'
+%left '&'
+%left '<<' '>>'
+%left '>>>'
+%left '+' '-'
+%left '*' '/'
+%left '~'
+%left 'new' 'RegExpLiteral'
+%left '(' '[' ']' '{' '}'
+%right ')'
+
+%%
+VExpr /* 变量表式 */
+	: Expr %prec new
+	| id '.' id '(' ArgList ')' { $$ = ['mcall', $1, $3, $5]; }
+	| id '(' ArgList ')' { $$ = ['call', $1, $3]; }
+	| id
+	| '(' VExpr ')' { $$ = $2; }
+	| VExpr '[' VExpr ']' { $$ = ['index', $1, $3]; }
+	;
+	
+ArgList
+	: { $$ = []; }
+	| VExpr { $$ = [$1]; }
+	| ArgList ',' VExpr { $1.push($3); $$ = $1; }
+	;
+	
+Expr /* 常量表达式 */
+	: Number { $$ = $1; }
+	| '(' Expr ')' { $$ = $2; }
+	| Expr '+' Expr { $$ = $1 + $3; }
+	| Expr '|' Expr { $$ = $1 | $3; }
+	| Expr '&' Expr { $$ = $1 & $3; }
+	| Expr '-' Expr { $$ = $1 - $3; }
+	| Expr '*' Expr { $$ = $1 * $3; }
+	| Expr '/' Expr { $$ = $1 / $3; }
+	| Expr '<<' Expr { $$ = $1 << $3; }
+	| Expr '>>' Expr { $$ = $1 >> $3; }
+	| Expr '>>>' Expr { $$ = $1 >>> $3; }
+	| '~' Expr { $$ = ~$2; }
+	| '-' Expr %prec '~' { $$ = -$2 }
+	| Array
+	| Expr '[' Expr ']' { $$ = $1[$3]; }
+	| '{' '}' { $$ = {}; }
+	| new 'RegExp' '(' string ')' Expr { $$ = Number(String($6).match(new RegExp($4))[0]); }
+	| RegExpLiteral Expr { $$ = Number(String($2).match(new RegExp($1))[0]); }
+	;
+	
+Array
+	: '[' ArrayList ']' { $$ = $2; }
+	;
+	
+ArrayList
+	: { $$ = [] }
+	| Expr ',' ArrayList { $3.unshift($1); $$ = $3; }
+	| Expr { $$ = [$1]; }
+	;
+	
+Number
+	: hex
+	| int
+	;

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				layout="absolute"
+				creationComplete="appCreationCompleteHandler(event)">
+	<mx:Script>
+		<![CDATA[
+			import com.maccherone.json.JSON;
+			
+			import mx.events.FlexEvent;
+			
+			import org.lala.gen.JsLexer;
+			import org.lala.gen.JsParser;
+			
+			protected function appCreationCompleteHandler(event:FlexEvent):void
+			{
+//				lexer.source = "= 0x7F ++ += true -- ... [] () false /= false1";
+//				lexer.source = "(~(~[][{}] << ~[][{}]))";
+				
+				var tokens:Array = org.lala.gen.JsLexer.lex_seq('(~(~[][{}] << ~[][{}]))');
+				trace(JSON.encode(tokens, true));
+			}
+			
+			protected function go_clickHandler(event:MouseEvent):void
+			{
+				
+				try {
+				//'lI.t(lI.s(lI.u(lI.z(lI.u(lI.i(new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]),~[][{}] >>> ~[][{}]),Il[lI.b(lI.s(l1))]),lI.l(lI.s(ll),lI.m(lI.w(),new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]),new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}])))))),lI.z(lI.u(lI.m(lI.z(Il[new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]],lI.l(lI.s(ll),~~[][{}],lI.x())),lI.u(lI.n(),ll)),Il[new RegExp(".$")(~[][{}] << ~[][{}]) << ~[][{}] >>> ~[][{}] | ~[][{}] >>> ~[][{}]]),Il[I1(lI.p(new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}])),ll),lI)]),lI.s(lI.u(lI.i(lI.z(new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}],Il[lI.z(lI.j(),new RegExp(".")(~(~[][{}] << ~[][{}])))])),Il[lI.v()])))';
+				var result:* = JsParser.parse(input.text);
+//				trace(JSON.encode(result, true));
+				output.text = JSON.encode(result, true);
+				}
+				catch(e:Error) {
+					output.text = e.toString();
+				}
+				rp.enabled = true;
+			}
+			
+			protected function rp_clickHandler(event:MouseEvent):void
+			{
+				function pp(expr) {
+					var _str = '';
+					var p = function(...args) {
+						_str += args.join('');
+					};
+					function print(expr) {
+						var t = typeof expr;
+						switch(t) {
+							case 'string'://id
+							case 'number'://
+								//p(JSON.stringify(expr));
+								p(expr);
+								break;
+							case 'object':
+								if(expr is Array) {
+									var head = expr[0];
+									switch(head) {
+										case 'index':
+											p(expr[1], '[');
+											print(expr[2]);
+											p(']');
+											break;
+										case 'call':
+											p(expr[1], '(');
+											print_args(expr[2]);
+											p(')');
+											break;
+										case 'mcall':
+											print_mcall(expr[1], expr[2], expr[3]);
+											break;
+										default:
+											p(JSON.encode(expr));
+											break;
+									}
+								}
+								break;
+						}
+					};
+					function print_args(args) {
+						for(var i = 0; i < args.length; i++) {
+							if(i >= 1) {
+								p(', ');
+							}
+							print(args[i]);
+						}
+					};
+					function print_mcall(obj, method, args) {
+						switch(method) {
+							case 's':
+								p('(str ');
+								print(args[0]);
+								p(')');
+								break;
+							case 'z':
+								p('(* ');
+								print(args[0]);
+								p(' ');
+								print(args[1]);
+								p(')');
+								break;
+							case 'u':
+								p('(+ ');
+								print(args[0]);
+								p(' ');
+								print(args[1]);
+								p(')');
+								break;
+							case 'p':
+								p('(rem ');
+								print(args[1]);
+								p(' ');
+								print(args[0]);
+								p(')');
+								break;
+							case 'l':
+								p('(.substring ');
+								print(args[0]);
+								p(' ');
+								print(args[1]);
+								p(' ');
+								print(args[2]);
+								p(')');
+								break;
+							case 'm':
+								p('(- ');
+								print(args[0]);
+								p(' ');
+								print(args[1]);
+								p(')');
+								break;
+							case 'b':
+								p('(.length ');
+								print(args[0]);
+								p(')');
+								break;
+							case 'i':
+								p('(rand-int ');
+								print(args[0]);
+								p(')');
+								break;
+							case 'w':
+								p('2');
+								break;
+							case 'v':
+								p('16');
+								break;
+							case 'x':
+								p('4');
+								break;
+							case 'j':
+								p('8');
+								break;
+							default:
+								p('(', obj, '.', method , ' ');
+								print_args(args);
+								p(')');
+								break;
+						}
+					};
+					print(expr);
+					return _str;
+				}			
+				
+				output.text = pp(JSON.decode(output.text));
+				rp.enabled = false;
+			}
+			/*
+			protected function ts_clickHandler(event:MouseEvent):void
+			{
+				var s:String = '[new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(~(~[][{}] << ~[][{}])),new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp("....")(new RegExp("......$")(~(~[][{}] << ~[][{}]))) & ~(new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(~(~[][{}] << ~[][{}])) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(~(~[][{}] << ~[][{}])),new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << ~[][{}] >>> ~[][{}] | (new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}]))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}])))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]),new RegExp(".$")(~[][{}] << ~[][{}]) << new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))),new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) | (new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}]))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}])))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(~(~[][{}] << ~[][{}])),(~(~[][{}] << ~[][{}]) >>> new RegExp(".$")(~[][{}] << ~[][{}]) & ~(new RegExp("......$")(new RegExp("........")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(~(~[][{}] << ~[][{}]))) | new RegExp(".....")(~(~[][{}] << ~[][{}])) | (~[][{}] >>> ~[][{}] | new RegExp(".$")(~[][{}] << ~[][{}]) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}])))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}])))) & ~((new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}])))),(new RegExp("....")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) | (new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) & ~((new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(~(~[][{}] << ~[][{}]))),new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))),new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}]))) | (new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}],(new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}])))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}] | new RegExp("....")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) & ~((new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(~(~[][{}] << ~[][{}]))),~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}],(new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}])))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) | new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))),new RegExp(".$")(new RegExp("....")(~(~[][{}] << ~[][{}]))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) | new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) | new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))),new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}])) | new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}])) | new RegExp(".")(~(~[][{}] << ~[][{}])),new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) >> new RegExp(".")(~(~[][{}] << ~[][{}])) | new RegExp(".")(new RegExp(".....$")(~(~[][{}] << ~[][{}]))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}]))) | ((new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}])))) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))),new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) | new RegExp("....$")(~(~[][{}] << ~[][{}])) & ~(new RegExp(".")(new RegExp("...$")(~(~[][{}] << ~[][{}]))) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]),~(~[][{}] << ~[][{}]) >>> ((new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(~(~[][{}] << ~[][{}])) | ~[][{}] >>> ~[][{}]) & ~((new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(~(~[][{}] << ~[][{}])) | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}])))),((new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) << new RegExp(".$")(~[][{}] << ~[][{}]) | (new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}] | new RegExp(".")(~(~[][{}] << ~[][{}]))) << (new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}]))) | ((new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]) << new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}])))) << new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}])))]';
+				s = s.substring(1, s.length - 1);
+				var a:Array = s.split(',');
+				for(var i:uint = 0; i < a.length; i ++) {
+					try {
+						var r:* = JsParser.parse(a[i]);
+						trace(r);
+					}
+					catch(e:Error) {
+						trace(e);
+					}
+				}
+			}
+			*/
+			
+		]]>
+	</mx:Script>
+	<mx:VDividedBox left="10" right="10" top="10" bottom="10" verticalAlign="middle" horizontalAlign="center">
+		<mx:TextArea id="input" width="100%" height="50%" fontFamily="Courier New" fontSize="14" />
+		<mx:TextArea id="output" width="100%" height="50%" fontFamily="Courier New" fontSize="14" />
+		<mx:HBox>
+			<mx:Button id="go" click="go_clickHandler(event)" label="Reduce" />
+			<mx:Button id="rp" click="rp_clickHandler(event)" label="Print" enabled="false"/>
+			<!-- <mx:Button id="ts" label="Test" click="ts_clickHandler(event)" /> -->
+		</mx:HBox>
+	</mx:VDividedBox>
+</mx:Application>
