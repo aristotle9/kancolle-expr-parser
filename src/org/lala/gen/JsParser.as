@@ -75,7 +75,7 @@ case 0x3:
  _result = ['call', _outputStack[_outputStack.length - 4], _outputStack[_outputStack.length - 2]]; 
 break;
 case 0x4:
-
+ _result = ['var', _outputStack[_outputStack.length - 1]]; 
 break;
 case 0x5:
  _result = _outputStack[_outputStack.length - 2]; 

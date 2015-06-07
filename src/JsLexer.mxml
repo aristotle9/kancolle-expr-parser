@@ -8,6 +8,21 @@
 			
 			import mx.events.FlexEvent;
 			
+			import org.lala.folderActors.AdditionActor;
+			import org.lala.folderActors.ConstantActor;
+			import org.lala.folderActors.DivisionActor;
+			import org.lala.folderActors.FloorActor;
+			import org.lala.folderActors.FolderAdapter;
+			import org.lala.folderActors.IFolder;
+			import org.lala.folderActors.JoinActor;
+			import org.lala.folderActors.ModuloActor;
+			import org.lala.folderActors.MultiplicationActor;
+			import org.lala.folderActors.NumberSegActor;
+			import org.lala.folderActors.SqrtActor;
+			import org.lala.folderActors.StringLengthActor;
+			import org.lala.folderActors.SubtractionActor;
+			import org.lala.folderActors.ToStringActor;
+			import org.lala.folderActors.XORActor;
 			import org.lala.gen.JsLexer;
 			import org.lala.gen.JsParser;
 			
@@ -27,6 +42,7 @@
 				//'lI.t(lI.s(lI.u(lI.z(lI.u(lI.i(new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}]),~[][{}] >>> ~[][{}]),Il[lI.b(lI.s(l1))]),lI.l(lI.s(ll),lI.m(lI.w(),new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]),new RegExp(".")(new RegExp("....$")(~(~[][{}] << ~[][{}])))))),lI.z(lI.u(lI.m(lI.z(Il[new RegExp(".")(new RegExp("..$")(~(~[][{}] << ~[][{}]))) | ~[][{}] >>> ~[][{}]],lI.l(lI.s(ll),~~[][{}],lI.x())),lI.u(lI.n(),ll)),Il[new RegExp(".$")(~[][{}] << ~[][{}]) << ~[][{}] >>> ~[][{}] | ~[][{}] >>> ~[][{}]]),Il[I1(lI.p(new RegExp(".$")(~[][{}] << ~[][{}]) | new RegExp(".")(~(~[][{}] << ~[][{}])),ll),lI)]),lI.s(lI.u(lI.i(lI.z(new RegExp(".$")(~[][{}] << ~[][{}]) | ~[][{}] >>> ~[][{}],Il[lI.z(lI.j(),new RegExp(".")(~(~[][{}] << ~[][{}])))])),Il[lI.v()])))';
 				var result:* = JsParser.parse(input.text);
 //				trace(JSON.encode(result, true));
+//				result = mcall_fold(result);
 				output.text = JSON.encode(result, true);
 				}
 				catch(e:Error) {
@@ -55,7 +71,8 @@
 									var head = expr[0];
 									switch(head) {
 										case 'index':
-											p(expr[1], '[');
+											print(expr[1]);
+											p('[');
 											print(expr[2]);
 											p(']');
 											break;
@@ -63,6 +80,9 @@
 											p(expr[1], '(');
 											print_args(expr[2]);
 											p(')');
+											break;
+										case 'var':
+											p(expr[1]);
 											break;
 										case 'mcall':
 											print_mcall(expr[1], expr[2], expr[3]);
@@ -162,6 +182,30 @@
 				
 				output.text = pp(JSON.decode(output.text));
 				rp.enabled = false;
+			}
+			
+			protected function mcall_fold(expr:*):Object
+			{
+				var folder:IFolder = new FolderAdapter();
+				folder
+					.add('b', new StringLengthActor)
+					.add('j', new ConstantActor(8))
+					.add('k', new XORActor)
+					.add('l', new NumberSegActor)
+					.add('m', new SubtractionActor)
+					.add('o', new DivisionActor)
+					.add('p', new ModuloActor)
+					.add('q', new ConstantActor(1.44269504088896))
+					.add('r', new FloorActor)
+					.add('s', new ToStringActor)
+					.add('t', new JoinActor)
+					.add('u', new AdditionActor)
+					.add('v', new ConstantActor(16))
+					.add('w', new ConstantActor(2))
+					.add('x', new ConstantActor(4))
+					.add('y', new SqrtActor)
+					.add('z', new MultiplicationActor)
+				return folder.transform(expr);
 			}
 			/*
 			protected function ts_clickHandler(event:MouseEvent):void

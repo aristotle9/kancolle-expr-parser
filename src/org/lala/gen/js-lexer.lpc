@@ -172,7 +172,7 @@ VExpr /* 变量表式 */
 	: Expr %prec new
 	| id '.' id '(' ArgList ')' { $$ = ['mcall', $1, $3, $5]; }
 	| id '(' ArgList ')' { $$ = ['call', $1, $3]; }
-	| id
+	| id { $$ = ['var', $1]; }
 	| '(' VExpr ')' { $$ = $2; }
 	| VExpr '[' VExpr ']' { $$ = ['index', $1, $3]; }
 	;
